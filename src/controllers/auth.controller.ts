@@ -22,7 +22,7 @@ export const CLogin = async (
 }
 
 // Fungsi untuk membuat user admin baru
-export const CCreateAdmin = async (req: Request, res: Response, _next: NextFunction) => {
+export const CRegister = async (req: Request, res: Response, _next: NextFunction) => {
     try {
         const { username, password, email, name } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);

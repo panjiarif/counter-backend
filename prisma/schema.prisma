@@ -7,7 +7,7 @@ generator client {
     provider = "prisma-client-js"
 }
 
-model dmin {
+model Admin {
     id        Int       @id @default(autoincrement())
     username  String    @unique @db.VarChar(50)
     password  String    @db.VarChar(500)
@@ -18,3 +18,26 @@ model dmin {
     updatedAt DateTime  @updatedAt
     deletedAt DateTime?
 }
+
+model Counter {
+    id Int @id @default(autoincrement())
+    name String @unique
+    currentQueue Int @default(0)
+    maxQueue Int @default(99)
+    queues Queue[]
+    isActive Boolean @default(true)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    deletedAt DateTime?
+}
+
+model Queue {
+    id Int @id @default(autoincrement())
+    number Int
+    status String
+    counterId Int
+    counter Counter @relation(fields: [counterId], references: [id])
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+}
+
