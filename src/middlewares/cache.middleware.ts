@@ -101,7 +101,7 @@ const generateCacheKey = (req: Request, prefix: string) => {
     const method = req.method;
     const userAgent = req.get("user-agent") || "";
 
-    const userId = req.admin?.id || "anonymous";
+    const userId = "anonymous"; //|| req.admin?.id;
 
     const keyData = {
         method,

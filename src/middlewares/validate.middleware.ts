@@ -44,7 +44,7 @@ const deleteAdminSchema = Joi.object({
 });
 
 // Middleware validasi untuk membuat user admin
-export const VRegister = (req: Request, res: Response, next: NextFunction) => {
+export const VCreateAdmin = (req: Request, res: Response, next: NextFunction) => {
     const { error } = adminSchema.validate(req.body);
     if (error) {
         const response: IGlobalResponse = {
