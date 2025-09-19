@@ -1,12 +1,14 @@
 import { Router } from "express";
-import { CCreateAdmin, CDeleteAdmin, CLoginAdmin, CUpdateAdmin } from "../controllers/auth.controller.js";
-import { MInvalidateCache } from "../middlewares/cache.middleware.js";
+import { CDeleteAdmin, CGetAllAdmins, CLoginAdmin, CRegisterAdmin, CUpdateAdmin } from "../controllers/auth.controller.js";
+import { CachePresents, MCache, MInvalidateCache } from "../middlewares/cache.middleware.js";
+import { MAuthValidate } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router.post("/login", CLoginAdmin);
-router.post('/create', MInvalidateCache(["medium_cache:*"]), CCreateAdmin);
-router.put('/:id', MInvalidateCache(["medium_cache:*"]), CUpdateAdmin);
-router.delete('/:id', MInvalidateCache(["medium_cache:*"]), CDeleteAdmin);
+router.post('/register', MInvalidateCache(["medium_cache:*"]), MAuthValidate, CRegisterAdmin);
+router.put('/:id', MInvalidateCache(["medium_cache:*"]), MAuthValidate, CUpdateAdmin);
+router.delete('/:id', MInvalidateCache(["medium_cache:*"]), MAuthValidate, CDeleteAdmin);
+router.get('/', MCache(CachePresents.medium(300)), MAuthValidate, CGetAllAdmins);
 
 export default router;

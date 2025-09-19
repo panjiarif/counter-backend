@@ -19,15 +19,15 @@ export const MAuthValidate = async(
 
         const payload = await UVerifyToken(token);
 
-        const admin = await prisma.admin.findUnique({
+        const user = await prisma.admin.findUnique({
             where: { id: payload.id, isActive: true, deletedAt: null }
         })
 
-        if (!admin) {
+        if (!user) {
             throw Error("Unauthorized");
         }
 
-        req.admin = payload;
+        req.user = payload;
 
         next();
     } catch (e) {

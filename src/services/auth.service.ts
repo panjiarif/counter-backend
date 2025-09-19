@@ -2,7 +2,6 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import type { IGlobalResponse } from "../interfaces/global.interface.js";
 import type { ILoginResponse } from "../interfaces/auth.interface.js";
-import { UGenerateToken } from "../utils/jwt.utils.js";
 
 const prisma = new PrismaClient();
 
@@ -18,8 +17,8 @@ export const SLogin = async (
             ],
             isActive: true,
             deletedAt: null
-        }
-    })
+        },
+    });
 
     if (!admin) {
         throw Error("Invalid credentials!");
@@ -31,18 +30,6 @@ export const SLogin = async (
         throw Error("Invalid credentials!");
     }
 
-    const token = await UGenerateToken({
-        id: admin.id,
-        username: admin.username,
-        password: admin.password,
-        email: admin.email,
-        name: admin.name,
-        isActive: admin.isActive,
-        createdAt: admin.createdAt,
-        updatedAt: admin.updatedAt,
-        deletedAt: admin.deletedAt,
-    });
-
     return {
         status: true,
         message: "Login successful",
@@ -53,13 +40,12 @@ export const SLogin = async (
                 email: admin.email,
                 name: admin.name,
             },
-            token,
         },
     };
 };
 
-// Funngsi untuk membuat user admin baru
-export const SCreateAdmin = async (
+// Fungsi untuk membuat user admin baru
+export const SRegisterAdmin = async (
     username: string,
     password: string,
     email: string,
@@ -85,6 +71,15 @@ export const SCreateAdmin = async (
 
     if (existingEmail) {
         throw Error("Email already exists.");
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        throw Error("Invalid email format");
+    }
+
+    if (password.length < 8) {
+        throw Error("Password must be at least 8 characters long");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -198,6 +193,35 @@ export const SUpdateAdmin = async (
         },
     };
 };
+
+// Fungsi untuk menghapus user admin
+export const SDeleteAdmin = async (id: number): Promise<IGlobalResponse> => {
+    const admin = await prisma.admin.findFirst({
+        where: {
+            id,
+            deletedAt: null,
+        }
+    });
+
+    if (!admin) {
+        throw Error("Admin user not found.");
+    }
+
+    await prisma.admin.update({
+        where: { id },
+        data: { 
+            deletedAt: new Date(),
+            isActive: false,
+            updatedAt: new Date(),
+        },
+    });
+
+    return {
+        status: true,
+        message: "Admin user deleted successfully.",
+        data: null,
+    };
+}
 
 // Fungsi untuk mendapatkan semua user admin
 export const SGetAllAdmins = async (): Promise<IGlobalResponse> => {

@@ -1,10 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import bcrypt from "bcrypt";
-import { SCreateAdmin, SGetAllAdmins, SLogin, SUpdateAdmin } from "../services/auth.service.js";
-import { PrismaClient } from "@prisma/client";
-import type { IGlobalResponse } from "../interfaces/global.interface.js";
-
-const prisma = new PrismaClient();
+import { 
+    SDeleteAdmin,
+    SGetAllAdmins,
+    SLogin,
+    SRegisterAdmin,
+    SUpdateAdmin
+} from "../services/auth.service.js";
 
 // Fungsi untuk login admin
 export const CLoginAdmin = async (
@@ -23,12 +25,16 @@ export const CLoginAdmin = async (
 }
 
 // Fungsi untuk membuat user admin baru
-export const CCreateAdmin = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const CRegisterAdmin = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+): Promise<void> => {
     try {
         const { username, password, email, name } = req.body;
         const hashedPassword = await bcrypt.hash(password, 10);
-        
-        const result = await SCreateAdmin(username, hashedPassword, email, name);
+
+        const result = await SRegisterAdmin(username, hashedPassword, email, name);
 
         res.status(201).json(result);
     } catch (error) {
@@ -55,31 +61,17 @@ export const CUpdateAdmin = async (
 };
 
 // Fungsi untuk menghapus user admin
-export const CDeleteAdmin = async (req: Request, res: Response, _next: NextFunction) => {
+export const CDeleteAdmin = async (
+    req: Request,
+    res: Response, 
+    next: NextFunction
+): Promise<void> => {
     try {
-        const { id } = req.params;
-
-        await prisma.admin.delete({
-            where: { id: parseInt(id) },
-        });
-
-        const response: IGlobalResponse = {
-            status: true,
-            message: "User admin deleted successfully",
-            data: null,
-        };
-
-        res.status(200).json(response);
-    } catch (err: any) {
-        if (err.code === 'P2025') {
-            // Error jika id tidak ditemukan
-            const response: IGlobalResponse = {
-                status: false,
-                message: "User admin not found.",
-            };
-            return res.status(404).json(response);
-        }
-        _next(err);
+        const id = parseInt(req.params.id);
+        const result = await SDeleteAdmin(id);
+        res.status(200).json(result);
+    } catch (error) {
+        next(error);
     }
 };
 
