@@ -74,4 +74,84 @@ export const SNextQueue = async (counterId: number): Promise<IGlobalResponse> =>
     } catch (error) {
         throw error;
     }
-}
+};
+
+// service untuk menndapatkan semua queue
+export const SGetAllQueues = async (): Promise<IGlobalResponse> => {
+    const queues = await prisma.queue.findMany({
+        include: { counter: true },
+        orderBy: { createdAt: 'asc' },
+    });
+
+    return {
+        status: true,
+        message: "Success get all queues!",
+        data: queues,
+    };
+};
+
+// service untuk mendapatkan queue berdasarkan ID
+export const SGetQueueById = async (id: number): Promise<IGlobalResponse> => {
+    const queue = await prisma.queue.findUnique({
+        where: { id },
+        include: { counter: true },
+    });
+
+    if (!queue) {
+        throw Error("Queue not found.");
+    }
+
+    return {
+        status: true,
+        message: "Success get queue by ID!",
+        data: queue,
+    };
+};
+
+// service untuk update status queue
+export const SUpdateQueueStatus = async (id: number, status: string): Promise<IGlobalResponse> => {
+    const validStatuses = ['claimed', 'called', 'completed', 'skipped'];
+    if (!validStatuses.includes(status)) {
+        throw Error("Invalid status value.");
+    }
+
+    const queue = await prisma.queue.findUnique({
+        where: { id },
+    });
+
+    if (!queue) {
+        throw Error("Queue not found.");
+    }
+
+    const updatedQueue = await prisma.queue.update({
+        where: { id },
+        data: { status },
+        include: { counter: true },
+    });
+
+    return {
+        status: true,
+        message: "Queue status updated successfully",
+        data: updatedQueue,
+    };
+};
+
+// service untuk menghapus queue
+export const SDeleteQueue = async (id: number): Promise<IGlobalResponse> => {
+    const queue = await prisma.queue.findUnique({
+        where: { id },
+    });
+
+    if (!queue) {
+        throw Error("Queue not found.");
+    }
+
+    await prisma.queue.delete({
+        where: { id },
+    });
+
+    return {
+        status: true,
+        message: "Queue deleted successfully.",
+    };
+};
