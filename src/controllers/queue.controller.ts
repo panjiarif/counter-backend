@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { SClaimQueue, SNextQueue } from "../services/queue.sevice.js";
+import { SClaimQueue, SNextQueue } from "../services/queue.service.js";
 
 export const CClaimQueue = async (
     req: Request,
